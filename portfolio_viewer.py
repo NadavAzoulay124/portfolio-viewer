@@ -80,8 +80,8 @@ if uploaded:
         all_rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
 
         last_px   = fetch_last_price(all_rics)
-        close_px  = fetch_exec_close(all_rics, exec_day_str)
         st.success(last_px)
+        close_px  = fetch_exec_close(all_rics, exec_day_str)
 
 
         def enrich(df):
