@@ -31,19 +31,15 @@ def split_excel(file):
 # ─────────────────────────  Refinitiv session  ──────────────────────
 if 'lseg_session' not in st.session_state or not st.session_state.lseg_session.is_opened:
     try:
-        st.write("Attempting to open LSEG Data Platform session...")
         st.session_state.lseg_session = ld.open_session("platform.rdp")
         st.session_state.lseg_session.open()
-        st.success("LSEG Data Platform session opened successfully!")
     except Exception as e:
-        st.error(f"❌ Failed to open LSEG Data Platform session. "
-                 f"Please ensure 'lseg-data.config.json' is in your repo root "
-                 f"and 'LSEG_DATA_CONFIG_PATH' is set in Streamlit secrets. Error: {e}")
-        st.stop() # Stop the app if session fails to open
-else:
-    st.info("LSEG Data Platform session already open.")
+        st.error(f"Error opening LSEG session: {e}")
+        st.stop()
 
-session = st.session_state.lseg_session # Use the stored session for subsequent API calls
+session = st.session_state.lseg_session
+
+# Use 'session' in subsequent ld.get_data() calls
 
 # ─────────────────────────  Price fetchers  ─────────────────────────
 @st.cache_data(ttl=10 * 60)                     # 10-min cache
