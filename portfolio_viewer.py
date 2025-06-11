@@ -43,10 +43,13 @@ def fetch_last_price(rics):
     """
     Return {RIC: last traded price} using a single ld.get_data() call.
     """
+    st.success(rics)
+    logging.getLogger("refinitiv.data").setLevel(logging.DEBUG)
     df = ld.get_data(
         universe =rics,
         fields = [
             'CF_LAST',
+            'TR.ClosePrice'
         ],
     )
     
