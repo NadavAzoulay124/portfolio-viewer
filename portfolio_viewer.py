@@ -46,14 +46,14 @@ def fetch_last_price(rics):
     st.success(rics)
     logging.getLogger("refinitiv.data").setLevel(logging.DEBUG)
     df = ld.get_data(
-        universe =['AAPL.O'],
+        universe =rics,
         fields = [
             'CF_LAST',
             'TR.ClosePrice'
         ],
     )
     
-    st.success(df.info)
+    st.success(df)
     return df.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
 @st.cache_data(ttl=24 * 60 * 60)               # one day cache
