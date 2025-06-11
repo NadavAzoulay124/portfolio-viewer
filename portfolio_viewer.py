@@ -29,17 +29,32 @@ def split_excel(file):
     return longs, shorts
 
 # ─────────────────────────  Refinitiv session  ──────────────────────
+# Use st.session_state to store the session and prevent re-opening on every rerun
 if 'lseg_session' not in st.session_state or not st.session_state.lseg_session.is_opened:
     try:
-        st.session_state.lseg_session = ld.open_session("platform.rdp")
+        st.write("Attempting to open LSEG Data Platform session using custom config path...")
+
+        # Define the absolute path to your config file on Streamlit Cloud
+        # Replace 'portfolio-viewer' with your actual GitHub repository name if different
+        config_file_path = "/mount/src/portfolio-viewer/lseg-data.config.json"
+
+        # Open the session, explicitly passing the path to the config file
+        st.session_state.lseg_session = ld.open_session(
+            config_name=config_file_path,
+            session_name="platform.rdp" # Still specify the session name defined within that config file
+        )
         st.session_state.lseg_session.open()
+
+        st.success("LSEG Data Platform session opened successfully!")
+
     except Exception as e:
-        st.error(f"Error opening LSEG session: {e}")
+        st.error(f"❌ Failed to open LSEG Data Platform session. "
+                 f"Please ensure 'lseg-data.config.json' is in your repo root and accessible. Error: {e}")
         st.stop()
+else:
+    st.info("LSEG Data Platform session already open.")
 
-session = st.session_state.lseg_session
-
-# Use 'session' in subsequent ld.get_data() calls
+session = st.session_state.lseg_session # Use the stored session
 
 # ─────────────────────────  Price fetchers  ─────────────────────────
 @st.cache_data(ttl=10 * 60)                     # 10-min cache
