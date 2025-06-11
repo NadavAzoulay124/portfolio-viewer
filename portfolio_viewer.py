@@ -40,8 +40,7 @@ if 'lseg_session' not in st.session_state or not st.session_state.lseg_session.i
 
         # Open the session, explicitly passing the path to the config file
         st.session_state.lseg_session = ld.open_session(
-            config_name=config_file_path,
-            session_name="platform.rdp" # Still specify the session name defined within that config file
+            config_name=config_file_path
         )
         st.session_state.lseg_session.open()
 
