@@ -126,49 +126,49 @@ def fetch_exec_close(rics, exec_date):
     )
     return resp.set_index("RIC")["CLOSE"].dropna().to_dict()
 
-# ─────────────────────────  UI widgets  ─────────────────────────────
-uploaded = st.file_uploader(
-    "Upload portfolio Excel",
-    type=["xlsx", "xls"],
-    help="Longs: Instrument / ICB Industry / Weight • "
-         "Shorts: Instrument.1 / ICB Industry.1 / Weight.1",
-)
+# # ─────────────────────────  UI widgets  ─────────────────────────────
+# uploaded = st.file_uploader(
+#     "Upload portfolio Excel",
+#     type=["xlsx", "xls"],
+#     help="Longs: Instrument / ICB Industry / Weight • "
+#          "Shorts: Instrument.1 / ICB Industry.1 / Weight.1",
+# )
 
-exec_day = st.date_input(
-    "Execution date (closing price reference)",
-    value=date.today(),
-)
-exec_day_str = exec_day.strftime("%Y-%m-%d")
+# exec_day = st.date_input(
+#     "Execution date (closing price reference)",
+#     value=date.today(),
+# )
+# exec_day_str = exec_day.strftime("%Y-%m-%d")
 
-# ─────────────────────────  Main flow  ──────────────────────────────
-if uploaded:
-    try:
-        longs_df, shorts_df = split_excel(uploaded)
-        st.success(f"Excel OK — fetching prices for {exec_day_str}…")
+# # ─────────────────────────  Main flow  ──────────────────────────────
+# if uploaded:
+#     try:
+#         longs_df, shorts_df = split_excel(uploaded)
+#         st.success(f"Excel OK — fetching prices for {exec_day_str}…")
 
-        all_rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
-        last_px   = fetch_last_price(all_rics)
-        close_px  = fetch_exec_close(all_rics, exec_day_str)
+#         all_rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
+#         last_px   = fetch_last_price(all_rics)
+#         close_px  = fetch_exec_close(all_rics, exec_day_str)
 
-        def enrich(df):
-            df["LastPrice"] = df["Instrument"].map(last_px)
-            df["ExecClose"] = df["Instrument"].map(close_px)
-            df["PnL %"] = ((df["LastPrice"] - df["ExecClose"])
-                           / df["ExecClose"] * 100).round(2)
-            return df
+#         def enrich(df):
+#             df["LastPrice"] = df["Instrument"].map(last_px)
+#             df["ExecClose"] = df["Instrument"].map(close_px)
+#             df["PnL %"] = ((df["LastPrice"] - df["ExecClose"])
+#                            / df["ExecClose"] * 100).round(2)
+#             return df
 
-        longs_df  = enrich(longs_df)
-        shorts_df = enrich(shorts_df)
+#         longs_df  = enrich(longs_df)
+#         shorts_df = enrich(shorts_df)
 
-        tab_long, tab_short = st.tabs(["Long positions", "Short positions"])
-        with tab_long:
-            st.dataframe(longs_df, use_container_width=True)
-        with tab_short:
-            st.dataframe(shorts_df, use_container_width=True)
+#         tab_long, tab_short = st.tabs(["Long positions", "Short positions"])
+#         with tab_long:
+#             st.dataframe(longs_df, use_container_width=True)
+#         with tab_short:
+#             st.dataframe(shorts_df, use_container_width=True)
 
-    except Exception as e:
-        st.error(f"❌ {e}")
+#     except Exception as e:
+#         st.error(f"❌ {e}")
 
-else:
-    st.info("Upload an Excel file, then pick the execution date.")
+# else:
+#     st.info("Upload an Excel file, then pick the execution date.")
 
