@@ -3,6 +3,3 @@ pandas>=2.2
 openpyxl
 lseg.data
 datetime
-json
-os
-pathlib
