@@ -48,8 +48,7 @@ def fetch_last_price(rics):
     df = ld.get_data(
         universe =rics,
         fields = [
-            'CF_LAST',
-            'TR.ClosePrice'
+            'CF_LAST'
         ],
     )
     
