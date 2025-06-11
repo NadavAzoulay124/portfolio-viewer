@@ -29,24 +29,6 @@ def split_excel(file):
     return longs, shorts
 
 # ─────────────────────────  Refinitiv session  ──────────────────────
-# ---------- build cfg -----------------------------------------------
-template_path = pathlib.Path(__file__).with_name("rdp_template.json")
-cfg = json.loads(template_path.read_text())
-
-cred = cfg["sessions"]["platform.rdp"]["credential"]
-cred["app_key"]  = st.secrets["RDP_APP_KEY"]
-cred["username"] = st.secrets["RDP_USERNAME"]
-cred["password"] = st.secrets["RDP_PASSWORD"]
-
-tmp = tempfile.NamedTemporaryFile(
-    mode="w", suffix=".json", delete=False
-)                        # stays on disk for the session lifetime
-json.dump(cfg, tmp)
-tmp.close()
-
-# Tell the SDK where to look
-os.environ["RDP_CONFIG_PATH"] = tmp.name
-
 session = ld.open_session("platform.rdp")
 session.open()
 
