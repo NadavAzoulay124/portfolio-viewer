@@ -2,3 +2,4 @@ streamlit>=1.34
 pandas>=2.2
 openpyxl
 lseg.data
+datetime
