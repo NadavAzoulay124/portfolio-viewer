@@ -39,7 +39,7 @@ def fetch_last_price(rics):
     Return {RIC: last traded price} using a single ld.get_data() call.
     """
     st.success(rics)
-    ld.logger.enable(level=ld.logger.LogLevel.DEBUG)        # shows HTTP + entitlement messages
+
 
     df = ld.get_data(
         session=session,               # your open PlatformSession
