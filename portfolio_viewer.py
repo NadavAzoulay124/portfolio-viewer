@@ -29,7 +29,7 @@ def split_excel(file):
     return longs, shorts
 
 # ─────────────────────────  Refinitiv session  ──────────────────────
-session = ld.open_session(config_name="/mount/src/portfolio-viewer/lseg-data.config.json")
+session = ld.open_session(config_name="/mount/src/portfolio-viewer/lseg-data.config.json", name="platform.rdp")
 session.open()
 
 # ─────────────────────────  Price fetchers  ─────────────────────────
