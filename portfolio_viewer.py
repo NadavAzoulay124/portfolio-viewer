@@ -45,9 +45,12 @@ def fetch_last_price(rics):
     """
     st.success(rics)
     logging.getLogger("refinitiv.data").setLevel(logging.DEBUG)
-    df = ld.get_data(        # your open PlatformSession
-        universe=["AAPL.O"],           # try one instrument first
-        fields=["TRDPRC_1", "DSPLY_NAME"]
+    df = ld.get_data(
+        universe =['AAPL.O'],
+        fields = [
+            'CF_LAST',
+            'TR.ClosePrice'
+        ],
     )
     
     st.success(df.info)
