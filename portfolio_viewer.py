@@ -53,7 +53,7 @@ def fetch_last_price(rics):
         ],
     )
     
-    st.success(df.info)
+    st.success(df)
     return df.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
 @st.cache_data(ttl=24 * 60 * 60)               # one day cache
