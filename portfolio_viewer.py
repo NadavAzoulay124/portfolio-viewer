@@ -42,7 +42,7 @@ def fetch_last_price(rics):
         universe=rics,
         fields=["TRDPRC_1"],          # last trade price
     )
-    st.success("resp")
+    st.success(resp)
     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
 @st.cache_data(ttl=24 * 60 * 60)               # one day cache
