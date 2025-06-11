@@ -1,44 +1,14 @@
-# portfolio_viewer.py
-import json, os, pathlib, tempfile
-from datetime import date
-
-import lseg.data as ld
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import lseg.data as ld
+from datetime import date
+import json, os, pathlib, tempfile
 
-# ────────────────────────── 1. PAGE CONFIG ───────────────────────────
+# ─────────────────────────  Streamlit page  ─────────────────────────
 st.set_page_config("Portfolio Viewer", layout="wide")
 st.title("📈 Portfolio Viewer — Long / Short with PnL")
 
-# ────────────────────────── 2. SESSION BOOTSTRAP ─────────────────────
-# template JSON (placeholders only) must be in the same folder
-template_path = pathlib.Path(__file__).with_name("rdp_template.json")
-
-if template_path.exists():
-    cfg = json.loads(template_path.read_text())
-else:  # minimal fallback when file missing
-    cfg = {
-        "sessions": {
-            "platform.rdp": {
-                "type": "platform",
-                "credential": {"app_key": "", "username": "", "password": ""},
-                "state": "enabled",
-            }
-        }
-    }
-
-cred = cfg["sessions"]["platform.rdp"]["credential"]
-cred["app_key"] = st.secrets["RDP_APP_KEY"]
-cred["username"] = st.secrets["RDP_USERNAME"]
-cred["password"] = st.secrets["RDP_PASSWORD"]
-
-tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
-json.dump(cfg, tmp); tmp.close()
-os.environ["RDP_CONFIG_PATH"] = tmp.name     # <- SDK picks this up
-
-session = ld.open_session("platform.rdp").open()  # default session
-
-# ────────────────────────── 3. HELPERS ───────────────────────────────
+# ─────────────────────────  Excel helper  ───────────────────────────
 REQ_LONG  = ["Instrument", "ICB Industry", "Weight"]
 REQ_SHORT = ["Instrument.1", "ICB Industry.1", "Weight.1"]
 
@@ -55,25 +25,39 @@ def split_excel(file):
 
     longs  = df[REQ_LONG].copy()
     shorts = df[REQ_SHORT].copy()
-    shorts.columns = ["Instrument", "ICB Industry", "Weight"]
+    shorts.columns = ["Instrument", "ICB Industry", "Weight"]  # nicer header
     return longs, shorts
 
-@st.cache_data(ttl=10 * 60)
-def fetch_last(rics):
-    resp = ld.get_data(session=session, universe=rics, fields=["TRDPRC_1"])
+# ─────────────────────────  Refinitiv session  ──────────────────────
+session = ld.open_session(config_name="/mount/src/portfolio-viewer/lseg-data.config.json")
+session.open()
+
+# ─────────────────────────  Price fetchers  ─────────────────────────
+@st.cache_data(ttl=10 * 60)                     # 10-min cache
+def fetch_last_price(rics):
+    """
+    Return {RIC: last traded price} using a single ld.get_data() call.
+    """
+    resp = ld.get_data(
+        universe=rics,
+        fields=["TRDPRC_1"],          # last trade price
+    )
     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
-@st.cache_data(ttl=24 * 60 * 60)
-def fetch_close(rics, d):
+@st.cache_data(ttl=24 * 60 * 60)               # one day cache
+def fetch_exec_close(rics, exec_date):
+    """
+    Return {RIC: CLOSE price on exec_date}:
+    SDate & EDate restrict the historical query to that single day.
+    """
     resp = ld.get_data(
-        session=session,
         universe=rics,
         fields=["CLOSE"],
-        parameters={"SDate": d, "EDate": d},
+        parameters={"SDate": exec_date, "EDate": exec_date},
     )
     return resp.set_index("RIC")["CLOSE"].dropna().to_dict()
 
-# ────────────────────────── 4. UI WIDGETS ────────────────────────────
+# ─────────────────────────  UI widgets  ─────────────────────────────
 uploaded = st.file_uploader(
     "Upload portfolio Excel",
     type=["xlsx", "xls"],
@@ -85,17 +69,17 @@ exec_day = st.date_input(
     "Execution date (closing price reference)",
     value=date.today(),
 )
-exec_str = exec_day.strftime("%Y-%m-%d")
+exec_day_str = exec_day.strftime("%Y-%m-%d")
 
-# ────────────────────────── 5. MAIN FLOW ─────────────────────────────
+# ─────────────────────────  Main flow  ──────────────────────────────
 if uploaded:
     try:
         longs_df, shorts_df = split_excel(uploaded)
-        st.success(f"Excel OK — fetching prices for {exec_str}…")
+        st.success(f"Excel OK — fetching prices for {exec_day_str}…")
 
-        rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
-        last_px  = fetch_last(rics)
-        close_px = fetch_close(rics, exec_str)
+        all_rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
+        last_px   = fetch_last_price(all_rics)
+        close_px  = fetch_exec_close(all_rics, exec_day_str)
 
         def enrich(df):
             df["LastPrice"] = df["Instrument"].map(last_px)
@@ -113,12 +97,9 @@ if uploaded:
         with tab_short:
             st.dataframe(shorts_df, use_container_width=True)
 
-    except Exception as err:
-        st.error(f"❌ {err}")
+    except Exception as e:
+        st.error(f"❌ {e}")
 
 else:
     st.info("Upload an Excel file, then pick the execution date.")
 
-# ────────────────────────── 6. CLEANUP ───────────────────────────────
-# (Not strictly necessary; session auto-closes on app shutdown)
-# session.close()
