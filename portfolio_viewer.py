@@ -1,78 +1,66 @@
 import lseg.data as ld
 import time
+import streamlit as st
 import pandas as pd
-import os
 
-# Configuration
-CSV_FILE_PATH = 'aapl_stock_price.csv'
-INSTRUMENT_RIC = 'AAPL.O' # Refinitiv Instrument Code for Apple Inc.
-UPDATE_INTERVAL_SECONDS = 5 # How often to update the CSV (e.g., every 5 seconds)
+# ---------- CONFIG ----------
 
-# --- Main Execution ---
-def main():
-    session = None
-    pricing_stream = None
+st.set_page_config("Portfolio Viewer", layout="wide")
 
-    try:
-        print("Opening LSEG Data Platform session...")
-        session = ld.open_session('platform.rdp')
-        session.open()
+XL_FILE_PATH = 'Selections_For_June2025_100x100.xlsx'
 
-        print("Session opened successfully! Initializing CSV...")
+# -------------HELPERS ---------------
 
-        pd.DataFrame(columns=['Timestamp', 'Instrument', 'Last Price']).to_csv(CSV_FILE_PATH, index=False, header=True)
 
-        print(f"Opening pricing stream for {INSTRUMENT_RIC}...")
-        pricing_stream = ld.open_pricing_stream(
-            universe=[INSTRUMENT_RIC],
-            fields=['BID', 'ASK', 'LAST', 'TRDPRC_1', 'TIMACT', 'GV5', 'NETCHNG_1', 'OPEN_PRC', 'HIGH_1', 'LOW_1'] # Added more fields for debugging
+def format_excel(file):
+    REQUIRED_LONG = ["Instrument", "ICB Industry", "Weight"]
+    REQUIRED_SHORT = ["Instrument.1", "ICB Industry.1", "Weight.1"]
+    df = pd.read_excel(file)
+
+     # Validate columns
+    missing_long  = set(REQUIRED_LONG)  - set(df.columns)
+    missing_short = set(REQUIRED_SHORT) - set(df.columns)
+    if missing_long or missing_short:
+        raise ValueError(
+            f"Missing columns – long: {missing_long or 'OK'}, "
+            f"short: {missing_short or 'OK'}"
         )
+    
+    longs  = df[REQUIRED_LONG].copy()
+    shorts = df[REQUIRED_SHORT].copy()
+    shorts.columns = ["Instrument", "ICB Industry", "Weight"]
 
-        print(f"Polling {INSTRUMENT_RIC} every {UPDATE_INTERVAL_SECONDS} seconds to update {CSV_FILE_PATH}. Press Ctrl+C to stop.")
+    return longs, shorts
 
-        while True:
-            snapshot_df = pricing_stream.get_snapshot()
 
-            if not snapshot_df.empty:
-                ric = snapshot_df.index[0] # Get RIC from the DataFrame's index
 
-                # Safely try to extract TRDPRC_1, then LAST
-                price = None
-                if 'TRDPRC_1' in snapshot_df.columns and pd.notna(snapshot_df['TRDPRC_1'].iloc[0]):
-                    price = snapshot_df['TRDPRC_1'].iloc[0]
-                elif 'LAST' in snapshot_df.columns and pd.notna(snapshot_df['LAST'].iloc[0]):
-                    price = snapshot_df['LAST'].iloc[0]
+# ---------- UI ----------
+st.title("📈 Portfolio Viewer — Long / Short Split")
 
-                # Extract timestamp
-                timestamp = pd.to_datetime(snapshot_df['TIMACT'].iloc[0]) if 'TIMACT' in snapshot_df.columns and pd.notna(snapshot_df['TIMACT'].iloc[0]) else pd.Timestamp.now()
+uploaded = st.file_uploader(
+    "Upload portfolio Excel (must contain the six columns shown below)",
+    type=["xlsx", "xls"],
+    help="Longs: Instrument, ICB Industry, Weight • Shorts: Instrument.1, ICB Industry.1, Weight.1",
+)
 
-                if price is not None:
-                    output_df = pd.DataFrame({
-                        'Timestamp': [timestamp],
-                        'Instrument': [ric],
-                        'Last Price': [price]
-                    })
-                    output_df.to_csv(CSV_FILE_PATH, index=False, header=True)
-                    print(f"[{timestamp.strftime('%H:%M:%S')}] Updated {ric} to {price}")
-                else:
-                    # If price is None, log the entire snapshot data to see what fields ARE present
-                    print(f"[{timestamp.strftime('%H:%M:%S')}] No valid price (TRDPRC_1 or LAST) found for {ric}. Full snapshot data: {snapshot_df.to_dict('records')}")
-            else:
-                print(f"[{pd.Timestamp.now().strftime('%H:%M:%S')}] Received empty snapshot for {INSTRUMENT_RIC}. No data yet or issue with instrument.")
+if uploaded:
+    try:
+        longs_df, shorts_df = format_excel(uploaded)
 
-            time.sleep(UPDATE_INTERVAL_SECONDS)
+        st.success("File loaded successfully!")
 
-    except KeyboardInterrupt:
-        print("\nScript stopped by user.")
+        tab1, tab2 = st.tabs(["Long positions", "Short positions"])
+
+        with tab1:
+            st.subheader("Longs")
+            st.dataframe(longs_df, use_container_width=True)
+
+        with tab2:
+            st.subheader("Shorts")
+            st.dataframe(shorts_df, use_container_width=True)
+
     except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        if pricing_stream:
-            pricing_stream.close()
-            print("Pricing stream closed.")
-        if session:
-            session.close()
-            print("LSEG Data Platform session closed.")
+        st.error(f"❌ {e}")
 
-if __name__ == "__main__":
-    main()
+else:
+    st.info("Drag & drop an Excel file to begin.")
