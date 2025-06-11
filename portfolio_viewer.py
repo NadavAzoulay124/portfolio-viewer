@@ -40,8 +40,7 @@ def fetch_last_price(rics):
     """
     st.success(rics)
 
-    df = ld.get_data(
-        session=session,               # your open PlatformSession
+    df = ld.get_data(        # your open PlatformSession
         universe=["AAPL.O"],           # try one instrument first
         fields=["TRDPRC_1", "DSPLY_NAME"]
     )
