@@ -40,8 +40,11 @@ def fetch_last_price(rics):
     """
     st.success(rics)
     resp = ld.get_data(
-        universe=rics,
-        fields=["CF_LAST"]         # last trade price
+        universe = ['WGS.OQ', 'IBTA.N', 'CRDO.OQ', 'SEZL.OQ', 'APLD.OQ', 'RGTI.OQ', 'AKRO.OQ', 'APP.OQ', 'SMR.N', 'WULF.OQ', 'CODI.N', 'SOUN.OQ', 'CIFR.OQ', 'BTDR.OQ', 'NEO.OQ', 'TEM.OQ', 'FL.N', 'NFE.OQ', 'FLYW.OQ', 'SMCI.OQ', 'GOGO.OQ', 'SRPT.OQ', 'ASTS.OQ', 'VICR.OQ', 'RXRX.OQ', 'AGL.N', 'CABO.N', 'ETNB.OQ', 'MARA.OQ', 'DV.N', 'PI.OQ', 'BE.N', 'CVNA.N', 'ACHR.N', 'LITE.OQ', 'BILL.N', 'VSCO.N', 'MOD.N', 'SAIA.OQ', 'VNET.OQ', 'ELF.N', 'COHR.N', 'SVV.N', 'SYM.OQ', 'TPC.N', 'PCT.OQ', 'TNDM.OQ', 'VSTS.N', 'MCHP.OQ', 'WWW.N', 'AAP.N', 'ALGM.OQ', 'JBLU.OQ', 'ACMR.OQ', 'VFC.N', 'TSLA.OQ', 'FMC.N', 'PLUG.OQ', 'RIOT.OQ', 'COIN.OQ', 'FN.N', 'MGNI.OQ', 'GO.OQ', 'RKLB.OQ', 'ECG.N', 'DLO.OQ', 'HOOD.OQ', 'NEOG.OQ', 'ASAN.N', 'U.N', 'ENPH.OQ', 'TROX.N', 'BROS.N', 'ENVX.OQ', 'ARHS.OQ', 'MDB.OQ', 'MSTR.OQ', 'DECK.N', 'CDE.N', 'WST.N', 'CRL.N', 'ADPT.OQ', 'ARIS.N', 'CENX.OQ', 'VRT.N', 'STRL.OQ', 'ARDX.OQ', 'OCUL.OQ', 'TLN.OQ', 'QDEL.OQ', 'SG.N', 'WRBY.N', 'VST.N', 'MP.N', 'MNDY.OQ', 'MRVL.OQ', 'CLF.N', 'CAVA.N', 'CIVI.N', 'GLBE.OQ', 'J.N', 'CSX.OQ', 'SSNC.OQ', 'WM.N', 'CHTR.OQ', 'BG.N', 'MDT.N', 'FDP.N', 'CHD.N', 'MPLX.N', 'OGE.N', 'GD.N', 'MDU.N', 'PRMB.N', 'RSG.N', 'SLGN.N', 'SJM.N', 'KMI.N', 'ACI.N', 'VLTO.N', 'SWX.N', 'STZ.N', 'EVRI.N', 'KHC.OQ', 'QSR.N', 'POST.N', 'WLKP.N', 'DGX.N', 'ACM.N', 'FDS.N', 'COR.N', 'INGR.N', 'ET.N', 'DOX.OQ', 'CCK.N', 'AJG.N', 'ROP.OQ', 'GWW.N', 'NWE.OQ', 'BATRA.OQ', 'VRSK.OQ', 'TIGO.OQ', 'NOMD.N', 'AMED.OQ', 'STE.N', 'CAG.N', 'KDP.OQ', 'LH.N', 'AGS.N', 'FCFS.OQ', 'ADP.OQ', 'ATO.N', 'KR.N', 'LNT.OQ', 'T.N', 'AVA.N', 'BRO.N', 'OGS.N', 'MMC.N', 'ORA.N', 'FE.N', 'ICE.N', 'NFG.N', 'BMY.N', 'NWN.N', 'TSN.N', 'JNPR.N', 'PEG.N', 'ED.N', 'PARA.OQ', 'BIP.N', 'RPRX.OQ', 'BKH.N', 'VZ.N', 'ETR.N', 'K.N', 'D.N', 'WTW.OQ', 'SYY.N', 'LHX.N', 'EVRG.OQ', 'BBSI.OQ', 'PFE.N', 'NI.N', 'AON.N', 'AMGN.OQ', 'AEE.N', 'SR.N', 'PPL.N', 'SO.N', 'WEC.N', 'XEL.OQ', 'EPD.N', 'AEP.OQ', 'CMS.N', 'PCG.N', 'DTE.N', 'CNP.N', 'DUK.N', 'FYBR.OQ'],
+        fields = [
+            'CF_LAST',
+            'TR.ClosePrice'
+        ],
     )
     
     st.success(resp)
