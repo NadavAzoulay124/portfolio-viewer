@@ -40,7 +40,7 @@ def fetch_last_price(rics):
     """
     resp = ld.get_data(
         universe=rics,
-        fields=["TRDPRC_1"],          # last trade price
+        fields=["CF_LAST"]         # last trade price
     )
     st.success(resp)
     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
