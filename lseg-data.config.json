@@ -1,0 +1,15 @@
+{
+    "sessions": {
+        "platform.rdp": {
+            "app-key": "0b600c34af104f599b585776739d9a365932f455",
+            "username": "randy@obexgroup.com",
+            "password": "Boston11",
+            "type": "platform",
+            "signon_control": true  
+        }
+    },
+    "logs": {
+        "level": "INFO",
+        "file": "lseg_data.log"
+    }
+}
