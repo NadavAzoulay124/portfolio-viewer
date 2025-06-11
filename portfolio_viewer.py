@@ -38,10 +38,12 @@ def fetch_last_price(rics):
     """
     Return {RIC: last traded price} using a single ld.get_data() call.
     """
+    st.success("1")
     resp = ld.get_data(
         universe=rics,
         fields=["TRDPRC_1"],          # last trade price
     )
+    st.success("2")
     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
 @st.cache_data(ttl=24 * 60 * 60)               # one day cache
@@ -80,7 +82,6 @@ if uploaded:
         all_rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
 
         last_px   = fetch_last_price(all_rics)
-        st.success(last_px)
         close_px  = fetch_exec_close(all_rics, exec_day_str)
 
 
