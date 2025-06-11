@@ -78,7 +78,7 @@ if uploaded:
         st.success(f"Excel OK — fetching prices for {exec_day_str}…")
 
         all_rics = longs_df["Instrument"].tolist() + shorts_df["Instrument"].tolist()
-        print(all_rics)
+        st.success(all_rics)
         last_px   = fetch_last_price(all_rics)
         close_px  = fetch_exec_close(all_rics, exec_day_str)
 
