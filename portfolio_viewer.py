@@ -3,10 +3,15 @@ import pandas as pd
 import lseg.data as ld
 from datetime import date
 import json, os, pathlib, tempfile
+import logging
 
 # ─────────────────────────  Streamlit page  ─────────────────────────
 st.set_page_config("Portfolio Viewer", layout="wide")
 st.title("📈 Portfolio Viewer — Long / Short with PnL")
+logging.basicConfig(
+    level=logging.DEBUG,                   # root logger goes to stdout
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+)
 
 # ─────────────────────────  Excel helper  ───────────────────────────
 REQ_LONG  = ["Instrument", "ICB Industry", "Weight"]
@@ -39,7 +44,7 @@ def fetch_last_price(rics):
     Return {RIC: last traded price} using a single ld.get_data() call.
     """
     st.success(rics)
-
+    logging.getLogger("refinitiv.data").setLevel(logging.DEBUG)
     df = ld.get_data(        # your open PlatformSession
         universe=["AAPL.O"],           # try one instrument first
         fields=["TRDPRC_1", "DSPLY_NAME"]
