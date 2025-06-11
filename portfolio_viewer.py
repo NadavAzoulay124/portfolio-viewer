@@ -46,7 +46,7 @@ def fetch_last_price(rics):
     st.success(resp)
     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
-@st.cache_data(ttl=24 * 60 * 60)               # one day cache
+# @st.cache_data(ttl=24 * 60 * 60)               # one day cache
 def fetch_exec_close(rics, exec_date):
     """
     Return {RIC: CLOSE price on exec_date}:
