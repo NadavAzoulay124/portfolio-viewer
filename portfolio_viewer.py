@@ -39,7 +39,6 @@ def fetch_last_price(rics):
     Return {RIC: last traded price} using a single ld.get_data() call.
     """
     st.success(rics)
-    ld.logger.enable(level=ld.logger.LogLevel.DEBUG)        # shows HTTP + entitlement messages
 
     df = ld.get_data(
         session=session,               # your open PlatformSession
@@ -47,7 +46,7 @@ def fetch_last_price(rics):
         fields=["TRDPRC_1", "DSPLY_NAME"]
     )
     
-    st.success(df)
+    st.success(df.info)
     return df.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
 @st.cache_data(ttl=24 * 60 * 60)               # one day cache
