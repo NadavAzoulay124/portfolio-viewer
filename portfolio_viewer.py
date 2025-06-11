@@ -33,7 +33,7 @@ session = ld.open_session(config_name="/mount/src/portfolio-viewer/lseg-data.con
 session.open()
 
 # ─────────────────────────  Price fetchers  ─────────────────────────
-@st.cache_data(ttl=10 * 60)                     # 10-min cache
+# @st.cache_data(ttl=10 * 60)                     # 10-min cache
 def fetch_last_price(rics):
     """
     Return {RIC: last traded price} using a single ld.get_data() call.
@@ -46,7 +46,7 @@ def fetch_last_price(rics):
     st.success(resp)
     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
-# @st.cache_data(ttl=24 * 60 * 60)               # one day cache
+@st.cache_data(ttl=24 * 60 * 60)               # one day cache
 def fetch_exec_close(rics, exec_date):
     """
     Return {RIC: CLOSE price on exec_date}:
