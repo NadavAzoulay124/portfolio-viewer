@@ -29,32 +29,77 @@ def split_excel(file):
     return longs, shorts
 
 # ─────────────────────────  Refinitiv session  ──────────────────────
-# Use st.session_state to store the session and prevent re-opening on every rerun
-if 'lseg_session' not in st.session_state or not st.session_state.lseg_session.is_opened:
+# # Use st.session_state to store the session and prevent re-opening on every rerun
+# if 'lseg_session' not in st.session_state or not st.session_state.lseg_session.is_opened:
+#     try:
+#         st.write("Attempting to open LSEG Data Platform session using custom config path...")
+
+#         # Define the absolute path to your config file on Streamlit Cloud
+#         # Replace 'portfolio-viewer' with your actual GitHub repository name if different
+#         config_file_path = "/mount/src/portfolio-viewer/lseg-data.config.json"
+
+#         # Open the session, explicitly passing the path to the config file
+#         st.session_state.lseg_session = ld.open_session(
+#             config_name=config_file_path, 
+#             name="platform.rdp"
+#         )
+#         st.session_state.lseg_session.open()
+
+#         st.success("LSEG Data Platform session opened successfully!")
+
+#     except Exception as e:
+#         st.error(f"❌ Failed to open LSEG Data Platform session. "
+#                  f"Please ensure 'lseg-data.config.json' is in your repo root and accessible. Error: {e}")
+#         st.stop()
+# else:
+#     st.info("LSEG Data Platform session already open.")
+
+# session = st.session_state.lseg_session # Use the stored session
+
+REPO_ROOT_DIR_NAME = "portfolio-viewer" # e.g., if your repo is 'your_username/portfolio-viewer'
+
+# Construct the expected root path on Streamlit Cloud
+base_path = os.path.join("/mount", "src", REPO_ROOT_DIR_NAME)
+st.header(f"Files and Directories under `{base_path}`:")
+
+found_files = []
+found_dirs = []
+
+if not os.path.exists(base_path):
+    st.error(f"Error: Base path '{base_path}' does not exist. Check your repository name.")
+else:
     try:
-        st.write("Attempting to open LSEG Data Platform session using custom config path...")
+        # Walk through the directory tree
+        for root, dirs, files in os.walk(base_path):
+            # Add directories
+            for d in dirs:
+                found_dirs.append(os.path.join(root, d))
+            # Add files
+            for f in files:
+                found_files.append(os.path.join(root, f))
 
-        # Define the absolute path to your config file on Streamlit Cloud
-        # Replace 'portfolio-viewer' with your actual GitHub repository name if different
-        config_file_path = "/mount/src/portfolio-viewer/lseg-data.config.json"
+        st.subheader("Directories:")
+        if found_dirs:
+            for d in sorted(found_dirs):
+                st.write(d)
+        else:
+            st.write("No directories found.")
 
-        # Open the session, explicitly passing the path to the config file
-        st.session_state.lseg_session = ld.open_session(
-            config_name=config_file_path, 
-            name="platform.rdp"
-        )
-        st.session_state.lseg_session.open()
-
-        st.success("LSEG Data Platform session opened successfully!")
+        st.subheader("Files:")
+        if found_files:
+            for f in sorted(found_files):
+                st.write(f)
+        else:
+            st.write("No files found.")
 
     except Exception as e:
-        st.error(f"❌ Failed to open LSEG Data Platform session. "
-                 f"Please ensure 'lseg-data.config.json' is in your repo root and accessible. Error: {e}")
-        st.stop()
-else:
-    st.info("LSEG Data Platform session already open.")
+        st.error(f"An error occurred while listing files: {e}")
 
-session = st.session_state.lseg_session # Use the stored session
+st.write("\n---")
+st.write("Once you identify the exact path of `lseg-data.config.json`,")
+st.write("revert your `portfolio_viewer.py` code and use that precise path in `config_name`.")
+st.write("Example: `ld.open_session(config_name='/mount/src/your_repo_name/lseg-data.config.json', name='platform.rdp')`")
+
 
 # ─────────────────────────  Price fetchers  ─────────────────────────
 @st.cache_data(ttl=10 * 60)                     # 10-min cache
