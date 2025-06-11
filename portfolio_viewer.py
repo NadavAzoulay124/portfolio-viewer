@@ -59,72 +59,72 @@ def split_excel(file):
 REPO_ROOT_DIR_NAME = "portfolio-viewer" # e.g., if your repo is 'your_username/portfolio-viewer'
 
 # Construct the expected root path on Streamlit Cloud
-base_path = os.path.join("/mount", "src", REPO_ROOT_DIR_NAME)
-st.header(f"Files and Directories under `{base_path}`:")
+# base_path = os.path.join("/mount", "src", REPO_ROOT_DIR_NAME)
+# st.header(f"Files and Directories under `{base_path}`:")
 
-found_files = []
-found_dirs = []
+# found_files = []
+# found_dirs = []
 
-if not os.path.exists(base_path):
-    st.error(f"Error: Base path '{base_path}' does not exist. Check your repository name.")
-else:
-    try:
-        # Walk through the directory tree
-        for root, dirs, files in os.walk(base_path):
-            # Add directories
-            for d in dirs:
-                found_dirs.append(os.path.join(root, d))
-            # Add files
-            for f in files:
-                found_files.append(os.path.join(root, f))
+# if not os.path.exists(base_path):
+#     st.error(f"Error: Base path '{base_path}' does not exist. Check your repository name.")
+# else:
+#     try:
+#         # Walk through the directory tree
+#         for root, dirs, files in os.walk(base_path):
+#             # Add directories
+#             for d in dirs:
+#                 found_dirs.append(os.path.join(root, d))
+#             # Add files
+#             for f in files:
+#                 found_files.append(os.path.join(root, f))
 
-        st.subheader("Directories:")
-        if found_dirs:
-            for d in sorted(found_dirs):
-                st.write(d)
-        else:
-            st.write("No directories found.")
+#         st.subheader("Directories:")
+#         if found_dirs:
+#             for d in sorted(found_dirs):
+#                 st.write(d)
+#         else:
+#             st.write("No directories found.")
 
-        st.subheader("Files:")
-        if found_files:
-            for f in sorted(found_files):
-                st.write(f)
-        else:
-            st.write("No files found.")
+#         st.subheader("Files:")
+#         if found_files:
+#             for f in sorted(found_files):
+#                 st.write(f)
+#         else:
+#             st.write("No files found.")
 
-    except Exception as e:
-        st.error(f"An error occurred while listing files: {e}")
+#     except Exception as e:
+#         st.error(f"An error occurred while listing files: {e}")
 
-st.write("\n---")
-st.write("Once you identify the exact path of `lseg-data.config.json`,")
-st.write("revert your `portfolio_viewer.py` code and use that precise path in `config_name`.")
-st.write("Example: `ld.open_session(config_name='/mount/src/your_repo_name/lseg-data.config.json', name='platform.rdp')`")
+# st.write("\n---")
+# st.write("Once you identify the exact path of `lseg-data.config.json`,")
+# st.write("revert your `portfolio_viewer.py` code and use that precise path in `config_name`.")
+# st.write("Example: `ld.open_session(config_name='/mount/src/your_repo_name/lseg-data.config.json', name='platform.rdp')`")
 
 
-# ─────────────────────────  Price fetchers  ─────────────────────────
-@st.cache_data(ttl=10 * 60)                     # 10-min cache
-def fetch_last_price(rics):
-    """
-    Return {RIC: last traded price} using a single ld.get_data() call.
-    """
-    resp = ld.get_data(
-        universe=rics,
-        fields=["TRDPRC_1"],          # last trade price
-    )
-    return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
+# # ─────────────────────────  Price fetchers  ─────────────────────────
+# @st.cache_data(ttl=10 * 60)                     # 10-min cache
+# def fetch_last_price(rics):
+#     """
+#     Return {RIC: last traded price} using a single ld.get_data() call.
+#     """
+#     resp = ld.get_data(
+#         universe=rics,
+#         fields=["TRDPRC_1"],          # last trade price
+#     )
+#     return resp.set_index("RIC")["TRDPRC_1"].dropna().to_dict()
 
-@st.cache_data(ttl=24 * 60 * 60)               # one day cache
-def fetch_exec_close(rics, exec_date):
-    """
-    Return {RIC: CLOSE price on exec_date}:
-    SDate & EDate restrict the historical query to that single day.
-    """
-    resp = ld.get_data(
-        universe=rics,
-        fields=["CLOSE"],
-        parameters={"SDate": exec_date, "EDate": exec_date},
-    )
-    return resp.set_index("RIC")["CLOSE"].dropna().to_dict()
+# @st.cache_data(ttl=24 * 60 * 60)               # one day cache
+# def fetch_exec_close(rics, exec_date):
+#     """
+#     Return {RIC: CLOSE price on exec_date}:
+#     SDate & EDate restrict the historical query to that single day.
+#     """
+#     resp = ld.get_data(
+#         universe=rics,
+#         fields=["CLOSE"],
+#         parameters={"SDate": exec_date, "EDate": exec_date},
+#     )
+#     return resp.set_index("RIC")["CLOSE"].dropna().to_dict()
 
 # # ─────────────────────────  UI widgets  ─────────────────────────────
 # uploaded = st.file_uploader(
