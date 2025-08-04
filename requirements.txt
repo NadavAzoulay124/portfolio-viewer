@@ -3,3 +3,4 @@ pandas>=2.2
 openpyxl
 lseg.data
 datetime
+refinitiv.data
