@@ -1,6 +1,7 @@
-streamlit>=1.34
-pandas>=2.2
-openpyxl
-lseg.data
-datetime
-refinitiv.data
+streamlit==1.35.0
+refinitiv-data==2.1.1          # brings in lseg-data automatically
+pandas==2.2.2
+numpy==1.26.4                  # wheel exists for cp311
+scipy==1.11.4                  # wheel exists for cp311, no compile
+openpyxl==3.1.5
+altair==5.2.0
