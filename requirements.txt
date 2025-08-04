@@ -1,5 +1,5 @@
 streamlit==1.35.0
-refinitiv-data==2.1.1          # brings in lseg-data automatically
+refinitiv.data==2.1.1          # brings in lseg-data automatically
 pandas==2.2.2
 numpy==1.26.4                  # wheel exists for cp311
 scipy==1.11.4                  # wheel exists for cp311, no compile
